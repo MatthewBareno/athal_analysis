@@ -1,6 +1,4 @@
-data/raw/
-data/ref/
-results/
 *.fastq
 *.bam
 *.vcf
+*.sam
