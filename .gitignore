@@ -1,5 +1,15 @@
 *.fastq
+*.fastq.gz
+*.gz
 *.fna
 *.bam
 *.vcf
+*.sam
+*.amb
+*TAIR*
+*.fna
+*.ann
+*.bwt
+*.pac
+*.sa
 *.sam
