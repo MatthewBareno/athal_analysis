@@ -1,6 +1,6 @@
 # Log
 
-## Date: 2024-12-19
+## Date: 2026-02-28
 
 ### Activities
 - Downloaded the list of studies on the species
