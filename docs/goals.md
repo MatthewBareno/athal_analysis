@@ -23,7 +23,7 @@ Perform population genetic analysis and a genome-wide association study (GWAS) o
 - **Phylogenetic Tree**: Construct evolutionary relationships between samples
 - **Other Population genetics figures**:Fst matrix among populations, heterozygosity by population (and perhaps by longitude/lattitude?, other potential vairables can also be considered)
 
-### 3. GWAS (Genome-Wide Association Study)
+### 4. GWAS (Genome-Wide Association Study)
 - Perform association analysis between SNPs and phenotypes
 - **Manhattan Plot**: Visualize significant SNP associations across the genome
 - **Summary Table**: Generate results table of SNPs with effect sizes ≥ threshold value
