@@ -15,4 +15,8 @@
 ## Date: 2026-03-02
 - familliarized myself with the [phenotpe website](https://arapheno.1001genomes.org/accessions/) to see what my options are in terms of maximizing the amount of accessions while getting a phenotype that is measured in as much accessions as possible
 - be sure to back-reference [this page](https://arapheno.1001genomes.org/faq/cite/) for citation later
--
+- used [this link](https://arapheno.1001genomes.org/phenotypes/?sort=-values&page=3) to determine "days to flowering trait" has the most amount of 1001GenomeProject accessions phenotyped plus is probably heritable enough to be good for GWAS.
+- Therefore the phenotype I will be analyzing is: [FT10](https://arapheno.1001genomes.org/phenotype/261/)
+- Phenotype data was accessible via [this page](https://arapheno.1001genomes.org/study/12/)
+- Phenotype downloaded and moved to data/pheno/ directory
+- confirmed that the first column in this phenotype data refers to the accession ID on the website
