@@ -20,3 +20,4 @@
 - Phenotype data was accessible via [this page](https://arapheno.1001genomes.org/study/12/)
 - Phenotype downloaded and moved to data/pheno/ directory
 - confirmed that the first column in this phenotype data refers to the accession ID on the website
+- Worked out the logic necessary to perform this project. Will resume later.
