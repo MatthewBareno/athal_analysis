@@ -23,3 +23,7 @@
 - <ins> phenotype.csv</ins> refers to the days to flower (DTF) at 16 and 10 degrees celsius. There are nmore accessions with 10 degrees DTF data, so I'll proceed with that.
 - In order to mass download read files the IDs need to be connected to some sort of identifier that ncbi (which hosts the genome read files) recognizes. Therefore this phenotype file, which merely has "accession ID", needs some sort of reference file to link that accession ID with the ID its hosted on ncbi.
 - If you go to the [main directory](https://1001genomes.org/) and scroll to the bottom under "Tables", you can see the [*Master List*](https://docs.google.com/spreadsheets/d/1Jd_TLRYLSi_MOL_Qbf3kaLXQUDoWVs7nl-BRRf59VO4/edit?usp=sharing). This has <ins>"id"</ins>, which accords with the accession ID in the phenotype file, <ins>name</ins>, and "<ins> CS Number</ins>". So now we need to somehow connect and/or use this information to automate downloads from blast for the read files.
+
+## Date: 2026-03-04
+- Downloaded the master accession list, and renamed it to `accession_list.csv` on data/
+-
