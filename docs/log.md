@@ -27,3 +27,7 @@
 ## Date: 2026-03-04
 - Downloaded the master accession list, and renamed it to `accession_list.csv` on data/
 -
+
+## Date: 2026-05-22
+- Set up environment on my new computer
+- 
