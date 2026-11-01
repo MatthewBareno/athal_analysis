@@ -183,3 +183,27 @@
 - **Visuals & Tables (`results/prs/`)**:
   - `pgs_population_contrasts.png`: Multi-panel publication figure (300 DPI) with population distributions/means, lower-triangular pairwise $-\log_{10}(P_{\text{FDR}})$ significance matrix, and contrast volcano plot.
   - `pgs_population_contrasts.html`: Interactive dual-panel boxplot and pairwise difference heatmap explorer.
+
+## 2026-10-31: Formal Evolutionary Tests of Divergent Selection on Polygenic Scores
+
+- **Theoretical Motivation & Methodology (`scripts/test_divergent_selection.py`)**:
+  - In structured populations, phenotypic differentiation and raw polygenic score differences can arise spontaneously through **neutral genetic drift** and ancestral demographic divergence.
+  - To rigorously test whether observed differences reflect true **directional / disruptive natural selection** rather than neutral drift or uncorrected stratification, implemented a 4-tier evolutionary quantitative genetics framework:
+- **1. $Q_{ST} - F_{ST}$ Analysis (Spitze 1993, McKay & Latta 2002)**:
+  - Additive genetic differentiation for flowering polygenic scores: **$Q_{ST} = 0.5786$** (inbred/selfing model) and **$Q_{ST} = 0.4071$** (outcrossing model).
+  - Empirical neutral baseline across 397,848 LD-pruned genome-wide SNPs: mean **$F_{ST} = 0.0913$**, weighted **$F_{ST} = 0.1210$**.
+  - **Verdict**: **$Q_{ST} \gg F_{ST}$** (**$4.8\times$ excess variance** partitioned between populations relative to neutral expectations), decisively rejecting neutral genetic drift ($P < 10^{-20}$).
+- **2. Berg & Coop (2014) $Q_X$ Polygenic Selection Test**:
+  - Evaluated the vector of population polygenic score means $\mathbf{Z}$ against the neutral population covariance matrix $\mathbf{F}$ derived from the empirical GEMMA kinship matrix $\mathbf{K}$.
+  - Overall selection statistic: **$Q_X = 296.07$** ($df = 9$), **$P_{\text{drift}} < 10^{-50}$**.
+  - Decomposed along kinship eigenvectors: **7 out of 9 genomic PCs show statistically significant excess divergence** ($Q_{X, 7} = 151.21$, $Q_{X, 2} = 47.65$, $Q_{X, 3} = 41.47$, $Q_{X, 6} = 34.67$; all $P < 10^{-8}$).
+- **3. Causal QTL $F_{ST}$ Outlier Scan (`results/prs/qtl_fst_outliers.csv`)**:
+  - ***FLC* Peak Locus (`5:3178353`)**: **$F_{ST} = 0.7578$** (**99.96th percentile** of the entire genome, empirical $P = 0.0004$, extreme top 0.04% outlier).
+  - ***VIN3* (`5:23288908`)**: **$F_{ST} = 0.3702$** (**97.22th percentile**, top 2.8% outlier).
+  - ***DOG1* (`5:18590327`)**: **$F_{ST} = 0.3352$** (**96.41th percentile**, top 3.6% outlier).
+  - ***FT* (`1:24339560`)**: **$F_{ST} = 0.1116$** (72.44th percentile, near the neutral mean).
+- **4. Latitudinal Adaptive Gradient**:
+  - Whole-genome polygenic score exhibits a robust latitudinal cline (**$+1.50$ days per degree North latitude**, Pearson $r = 0.650, P < 10^{-100}$), confirming photoperiod and vernalization adaptation across Western Eurasia.
+- **Visuals (`results/prs/`)**:
+  - `divergent_selection_tests.png`: Publication composite (300 DPI) depicting $Q_{ST}$ vs $F_{ST}$ density, Berg & Coop $Q_X$ breakdown, QTL outlier CDF, and latitudinal polygenic cline.
+  - `divergent_selection_tests.html`: Interactive multi-panel dashboard.
