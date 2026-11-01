@@ -1,0 +1,4 @@
+Model,CV_R2,CV_Pearson_r,CV_MAE_days
+"4-QTL Additive Score (FT, DOG1, VIN3, FLC)",0.4293,0.6553,10.72
+Whole-Genome GBLUP (Kinship Matrix),0.6664,0.8173,7.72
+Hybrid Model (4 QTLs + Polygenic Residual),0.6503,0.8108,8.07

@@ -134,6 +134,26 @@
     - **Panel B (QQ Plot, 25% width)**: Aligned to the exact same vertical $-\log_{10} P$ axis range ($0 \dots 12.5$), with 95% concentration band and $\lambda_{GC} = 1.108$ badge.
   - Saved outputs: `results/gwas/ft10_loco_manhattan_clear.png` and interactive `results/gwas/ft10_loco_manhattan_clear.html`.
 
+## 2026-10-31: Individual Polygenic Score (PGS / GBLUP) Assignment & Genomic Prediction
+
+- **Predictive Architecture & Models (`scripts/compute_polygenic_scores.py`)**:
+  - **4-QTL Additive Model (*FT*, *DOG1*, *VIN3*, *FLC*)**:
+    - 5-fold cross-validated $R^2 = \mathbf{42.93\%}$ (Pearson $r = 0.655$, $\text{MAE} = 10.72$ days).
+    - Demonstrates that four major-effect loci control over 40% of flowering variation alone.
+  - **Whole-Genome GBLUP (Empirical Kinship)**:
+    - 5-fold cross-validated $R^2 = \mathbf{66.64\%}$ (Pearson $r = \mathbf{0.8173}$, $\text{MAE} = 7.72$ days).
+    - Captures the complete infinitesimal background, approaching the theoretical maximum bounded by narrow-sense heritability ($h^2 = 88.06\%$).
+  - **Hybrid Model (4 QTLs + Polygenic Residual)**:
+    - 5-fold cross-validated $R^2 = \mathbf{65.03\%}$ (Pearson $r = 0.811$, $\text{MAE} = 8.07$ days).
+- **Individual Accession Table (`data/processed/athal_1003_polygenic_scores.csv`)**:
+  - Assigned out-of-sample cross-validated predictions (`PGS_gblup_cv`), full genomic estimated breeding values (`PGS_gblup_full`), 4-QTL scores (`PGS_4qtl_cv`), and residual error terms for all 1,003 accessions.
+- **Geographic Burden & Visuals (`results/prs/`)**:
+  - `polygenic_score_evaluation.png`: Publication 2-panel figure:
+    - Panel A: Observed vs Predicted FT10 scatter plot with linear fit and identity line.
+    - Panel B: Distribution of genetic breeding values across the 9 geographic lineages, demonstrating the adaptive cline from early-flowering Relict/Iberian accessions to late-flowering Northern Sweden accessions.
+  - `polygenic_score_evaluation.html`: Interactive Plotly explorer with hover metadata.
+  - `pgs_model_metrics.csv`: 5-fold CV evaluation metrics table.
+
 
 
 
