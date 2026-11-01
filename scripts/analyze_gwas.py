@@ -338,23 +338,99 @@ def plot_dual_model_comparison(df_glm, df_lmm, out_png):
     print(f"Generated dual-model comparison figure: {out_png}")
 
 
+def plot_4model_comparison(df_glm, df_lmm, df_loco, df_cond, out_png):
+    """Generate a 4-panel publication visual showing the methodological progression:
+    A: Naive GLM (10 PCs)
+    B: Standard LMM (Whole-Genome Kinship)
+    C: LOCO LMM (Leave-One-Chromosome-Out Kinship)
+    D: Stepwise Conditioned MLMM (Conditioned on FT, DOG1, VIN3)
+    """
+    fig, axes = plt.subplots(4, 1, figsize=(15.5, 14.5), dpi=300)
+    plt.subplots_adjust(hspace=0.36, top=0.95, bottom=0.05, left=0.07, right=0.96)
+    
+    models = [
+        (axes[0], df_glm, "A   PLINK 2 GLM (10 PC Covariates) — λ_GC = 2.674 (Severe Cryptic Relatedness Inflation)", '#CHROM', 'POS', 'P'),
+        (axes[1], df_lmm, "B   Standard GEMMA LMM (Whole-Genome Kinship) — λ_GC = 0.979 (Proximal Contamination Attenuation)", 'chr', 'ps', 'p_wald'),
+        (axes[2], df_loco, "C   LOCO GEMMA LMM (Leave-One-Chromosome-Out) — λ_GC = 1.108 (Sharpened FT, DOG1, VIN3 Peaks)", 'chr', 'ps', 'p_wald'),
+        (axes[3], df_cond, "D   Stepwise Conditioned Model (Conditioned on FT, DOG1, VIN3) — Unmasks FLC (P = 1.12e-22)", '#CHROM', 'POS', 'P')
+    ]
+    
+    chr_colors = ['#0284c7', '#334155']
+    sugg_log = 5.0
+    
+    for ax, df_data, title, chr_col, pos_col, p_col in models:
+        df_s = df_data.sort_values([chr_col, pos_col]).copy()
+        chroms = sorted(df_s[chr_col].unique())
+        offsets = {}
+        centers = {}
+        curr = 0
+        for c in chroms:
+            offsets[c] = curr
+            sub = df_s[df_s[chr_col] == c]
+            centers[c] = curr + sub[pos_col].max() / 2
+            curr += sub[pos_col].max() + 2000000
+        df_s['pos_cum'] = df_s[pos_col] + df_s[chr_col].map(offsets)
+        bonf_log = -np.log10(0.05 / len(df_s))
+        
+        for idx, c in enumerate(chroms):
+            sub = df_s[df_s[chr_col] == c]
+            non_sig = sub[sub['-log10p'] < sugg_log]
+            if len(non_sig) > 35000:
+                non_sig = non_sig.sample(35000, random_state=42)
+            ax.scatter(non_sig['pos_cum'], non_sig['-log10p'], c=chr_colors[idx % 2], s=5.5, alpha=0.55, edgecolors='none', rasterized=True)
+            sig_pts = sub[sub['-log10p'] >= sugg_log]
+            if not sig_pts.empty:
+                ax.scatter(sig_pts['pos_cum'], sig_pts['-log10p'], c='#ea580c', s=13, alpha=0.9, edgecolors='none', rasterized=True)
+                
+        ax.axhline(bonf_log, color='#dc2626', linestyle='--', linewidth=1.1)
+        ax.set_xticks([centers[c] for c in chroms])
+        ax.set_xticklabels([f"Chr {c}" for c in chroms], fontsize=9, fontweight='bold')
+        ax.set_ylabel(r"$-\log_{10}(P)$", fontsize=10, fontweight='bold')
+        ax.set_title(title, fontsize=11, fontweight='bold', loc='left')
+        ax.grid(True, linestyle=':', alpha=0.35, color='#cbd5e1')
+        ax.set_axisbelow(True)
+        ax.set_xlim(-1000000, curr)
+        ax.set_ylim(0, max(df_s['-log10p'].max() * 1.14, 10))
+        for spine in ['top', 'right']:
+            ax.spines[spine].set_visible(False)
+        for spine in ['left', 'bottom']:
+            ax.spines[spine].set_color('#94a3b8')
+            
+    plt.savefig(out_png, dpi=300)
+    plt.close()
+    print(f"Generated 4-model methodology comparison figure: {out_png}")
+
+
 def main():
     plink_file = 'results/gwas/plink2_glm_pc10.FT10.glm.linear'
     gemma_file = 'output/athal_1003_ft10_lmm.assoc.txt'
+    loco_file = 'results/gwas/ft10_gemma_loco_all.assoc.txt'
+    cond_file = 'results/gwas/plink2_glm_conditioned.FT10.glm.linear'
     
     df_plink = None
+    df_gemma = None
+    df_loco = None
+    df_cond = None
+    
     if os.path.exists(plink_file):
         df_plink = load_gwas_data(plink_file, p_col='P', chr_col='#CHROM', pos_col='POS', id_col='ID')
         plot_manhattan_and_qq(df_plink, "PLINK 2 GLM (10 PCs)", "results/gwas/ft10_plink2_glm_pc10")
-        plot_interactive_manhattan(df_plink, "PLINK 2 GLM (10 PCs)", "results/gwas/ft10_plink2_glm_pc10.html")
         
     if os.path.exists(gemma_file):
         df_gemma = load_gwas_data(gemma_file, p_col='p_wald', chr_col='chr', pos_col='ps', id_col='rs')
         plot_manhattan_and_qq(df_gemma, "GEMMA LMM (Kinship Matrix)", "results/gwas/ft10_gemma_lmm", p_col='p_wald', chr_col='chr', pos_col='ps')
-        plot_interactive_manhattan(df_gemma, "GEMMA LMM (Kinship Matrix)", "results/gwas/ft10_gemma_lmm.html", p_col='p_wald', chr_col='chr', pos_col='ps', id_col='rs')
         
-        if df_plink is not None:
-            plot_dual_model_comparison(df_plink, df_gemma, "results/gwas/gwas_glm_vs_lmm_comparison.png")
+    if os.path.exists(loco_file):
+        df_loco = load_gwas_data(loco_file, p_col='p_wald', chr_col='chr', pos_col='ps', id_col='rs')
+        plot_manhattan_and_qq(df_loco, "GEMMA LOCO LMM", "results/gwas/ft10_gemma_loco", p_col='p_wald', chr_col='chr', pos_col='ps')
+        plot_interactive_manhattan(df_loco, "GEMMA LOCO LMM", "results/gwas/ft10_gemma_loco.html", p_col='p_wald', chr_col='chr', pos_col='ps', id_col='rs')
+        
+    if os.path.exists(cond_file):
+        df_cond = load_gwas_data(cond_file, p_col='P', chr_col='#CHROM', pos_col='POS', id_col='ID')
+        plot_manhattan_and_qq(df_cond, "Conditioned MLMM", "results/gwas/ft10_stepwise_conditioned", p_col='P', chr_col='#CHROM', pos_col='POS')
+        
+    if df_plink is not None and df_gemma is not None and df_loco is not None and df_cond is not None:
+        plot_4model_comparison(df_plink, df_gemma, df_loco, df_cond, "results/gwas/gwas_4model_methodology_comparison.png")
 
 
 if __name__ == '__main__':

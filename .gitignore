@@ -13,6 +13,8 @@
 *.prune.in
 *.prune.out
 output/
+data/processed/loco/
 *.assoc.txt
 *.glm.linear
+*.raw
 

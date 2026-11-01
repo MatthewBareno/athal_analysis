@@ -110,6 +110,25 @@
   - `ft10_gemma_lmm_significant_snps.csv`: Lead significant SNPs with betas, standard errors, and allele frequencies.
   - `ft10_gemma_lmm.html` & `ft10_plink2_glm_pc10.html`: Interactive WebGL Manhattan plots.
 
+## 2026-10-31: Advanced GWAS Methodology — LOCO Kinship & Stepwise Multi-Locus Model (MLMM)
+
+- **Model 3: Leave-One-Chromosome-Out (LOCO) LMM (`scripts/run_loco_gwas.py`)**:
+  - Computed 5 chromosome-specific kinship matrices excluding the target chromosome ($\mathbf{K}_{-1} \dots \mathbf{K}_{-5}$) using 397,850 LD-pruned variants.
+  - Scanned 1,031,617 SNPs across all 5 chromosomes in GEMMA.
+  - **Eliminated proximal contamination**: Genome-wide significant hits expanded from 8 to **34 SNPs**.
+  - **Genomic Inflation**: $\lambda_{GC} = 1.1077$ (well calibrated).
+  - Peak $P$-values sharpened by almost $100\times$:
+    - ***VIN3*** (`5:23288908:T:A`): sharpened from $8.25 \times 10^{-10}$ to **$1.30 \times 10^{-11}$** ($\beta = +8.57$ days).
+    - ***DOG1*** (`5:18590327:A:C`): sharpened from $2.46 \times 10^{-9}$ to **$8.70 \times 10^{-11}$** ($\beta = -3.45$ days).
+    - ***FT*** (`1:24339560:G:T`): confirmed at $2.76 \times 10^{-9}$ ($\beta = -2.58$ days).
+    - Discovered an additional locus on Chr 1 at 9.02 Mb (`1:9025070:A:T`, $P = 6.30 \times 10^{-9}$, $\beta = +19.4$ days).
+- **Model 4: Stepwise Conditioning (MLMM)**:
+  - Extracted sample dosages for top leads (*FT*, *DOG1*, *VIN3*) into `data/processed/ft10_covars_pcs_and_leads.txt`.
+  - Conditioned GWAS in PLINK 2 on 10 PCs + the 3 lead QTLs.
+  - Successfully unmasked ***FLC* (*FLOWERING LOCUS C*, Chr 5: 3,188,327)** as the top global lead peak with **$P = 1.12 \times 10^{-22}$**, and revealed a secondary peak on Chr 2 (`2:9583341:T:A`, $P = 6.49 \times 10^{-18}$).
+- **4-Model Methodology Figure (`results/gwas/gwas_4model_methodology_comparison.png`)**:
+  - Synthesized the complete progression (A: GLM, B: Whole-Genome LMM, C: LOCO LMM, D: Conditioned MLMM) into a unified publication graphic.
+
 
 
 
