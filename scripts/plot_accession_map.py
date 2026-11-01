@@ -1,70 +1,92 @@
-"""Generate a publication-quality world map of Arabidopsis thaliana accessions colored by country.
+"""Generate a publication-quality world map of Arabidopsis thaliana accessions grouped by macro-region.
 
-Produces:
-- results/accession_world_map.html: Interactive Plotly map with country legend & hover tooltips
-- results/accession_world_map.png: High-resolution publication-quality figure (2200x1160)
+Classifies all 1,003 accessions into 10 geographic macro-regions corresponding
+to the primary sampling zones and genetic ancestry clusters in 1001 Genomes studies.
+
+Outputs:
+- results/accession_world_map.html: Interactive Plotly map with macro-region filtering
+- results/accession_world_map.png: High-resolution (2200x1160, 300-DPI) publication figure
 """
 
 import os
 import pandas as pd
 import plotly.graph_objects as go
 
+# Standard biogeographic macro-regions for 1001 Genomes accessions
+MACRO_REGIONS = {
+    # Scandinavia & Baltic
+    'SWE': 'Scandinavia & Baltic', 'NOR': 'Scandinavia & Baltic', 'FIN': 'Scandinavia & Baltic',
+    'DEN': 'Scandinavia & Baltic', 'EST': 'Scandinavia & Baltic', 'LTU': 'Scandinavia & Baltic',
 
-def generate_country_accession_map():
+    # Western Europe
+    'UK': 'Western Europe', 'FRA': 'Western Europe', 'GER': 'Western Europe',
+    'NED': 'Western Europe', 'BEL': 'Western Europe', 'IRL': 'Western Europe',
+
+    # Iberian Peninsula
+    'ESP': 'Iberian Peninsula', 'POR': 'Iberian Peninsula', 'CPV': 'Iberian Peninsula',
+
+    # South Europe & Balkans
+    'ITA': 'South Europe & Balkans', 'BUL': 'South Europe & Balkans', 'ROU': 'South Europe & Balkans',
+    'SRB': 'South Europe & Balkans', 'CRO': 'South Europe & Balkans', 'GRC': 'South Europe & Balkans',
+
+    # Central Europe
+    'CZE': 'Central Europe', 'AUT': 'Central Europe', 'SUI': 'Central Europe',
+    'POL': 'Central Europe', 'SVK': 'Central Europe',
+
+    # Eastern Europe & Russia
+    'RUS': 'Eastern Europe & Russia', 'UKR': 'Eastern Europe & Russia',
+
+    # North America
+    'USA': 'North America', 'CAN': 'North America',
+
+    # Caucasus & Near East
+    'AZE': 'Caucasus & Near East', 'GEO': 'Caucasus & Near East', 'ARM': 'Caucasus & Near East',
+    'TUR': 'Caucasus & Near East', 'IRN': 'Caucasus & Near East', 'LBN': 'Caucasus & Near East',
+
+    # Central & East Asia
+    'KGZ': 'Central & East Asia', 'KAZ': 'Central & East Asia', 'UZB': 'Central & East Asia',
+    'TJK': 'Central & East Asia', 'AFG': 'Central & East Asia', 'IND': 'Central & East Asia',
+    'CHN': 'Central & East Asia', 'JPN': 'Central & East Asia',
+
+    # North Africa
+    'MAR': 'North Africa'
+}
+
+# Colorblind-safe, distinct publication palette
+REGION_COLORS = {
+    'Western Europe': '#2563eb',          # Royal Blue
+    'Scandinavia & Baltic': '#0284c7',    # Nordic Cyan
+    'Iberian Peninsula': '#ea580c',       # Warm Terracotta
+    'South Europe & Balkans': '#9333ea',  # Mediterranean Violet
+    'Central Europe': '#16a34a',          # Continental Green
+    'Eastern Europe & Russia': '#0d9488', # Boreal Teal
+    'North America': '#dc2626',           # Crimson
+    'Caucasus & Near East': '#d97706',    # Caucasus Ochre
+    'Central & East Asia': '#db2777',     # Asian Rose
+    'North Africa': '#854d0e'             # Saharan Bronze
+}
+
+
+def generate_macro_region_map():
     data_path = 'data/processed/phenotype_clean.csv'
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Missing {data_path}. Run prepare_phenotypes.py first.")
 
     df = pd.read_csv(data_path)
     valid_geo = df.dropna(subset=['latitude', 'longitude']).copy()
+    valid_geo['macro_region'] = valid_geo['country'].map(MACRO_REGIONS).fillna('Other')
 
-    # Calculate accession counts per country
-    country_counts = valid_geo['country'].value_counts()
-    
-    # Countries with >= 10 accessions get dedicated distinct color categories;
-    # Countries with < 10 accessions are grouped as "Other" to keep the publication legend legible.
-    major_countries = country_counts[country_counts >= 10].index.tolist()
-    
-    def get_group(country):
-        if country in major_countries:
-            return f"{country} (n={country_counts[country]})"
-        else:
-            return f"Other ({len(country_counts) - len(major_countries)} countries, n={country_counts[country_counts < 10].sum()})"
-
-    valid_geo['country_group'] = valid_geo['country'].apply(get_group)
-
-    # Order groups by frequency
-    group_order = [f"{c} (n={country_counts[c]})" for c in major_countries]
-    other_label = f"Other ({len(country_counts) - len(major_countries)} countries, n={country_counts[country_counts < 10].sum()})"
-    group_order.append(other_label)
-
-    # High-contrast, colorblind-friendly publication palette
-    palette = [
-        '#1f77b4',  # SWE - Steel Blue
-        '#e6550d',  # ESP - Deep Orange
-        '#2ca02c',  # GER - Forest Green
-        '#756bb1',  # ITA - Purple
-        '#d62728',  # UK - Crimson Red
-        '#31a354',  # RUS - Emerald
-        '#6baed6',  # FRA - Sky Blue
-        '#e7ba52',  # USA - Warm Amber
-        '#9ecae1',  # CZE - Powder Blue
-        '#fdae6b',  # BUL - Salmon
-        '#bcbddc',  # AZE - Lavender
-        '#e377c2',  # GEO - Rose
-        '#17becf',  # NED - Cyan
-        '#8c564b',  # POR - Sienna Brown
-        '#7f7f7f',  # Other - Medium Gray
-    ]
-    color_map = {grp: palette[i % len(palette)] for i, grp in enumerate(group_order)}
+    # Compute accession count per region and order by prevalence
+    region_counts = valid_geo['macro_region'].value_counts()
+    ordered_regions = region_counts.index.tolist()
 
     fig = go.Figure()
 
-    # Add each country group as an independent trace (allows toggling in HTML)
-    for grp in group_order:
-        sub = valid_geo[valid_geo['country_group'] == grp]
-        if sub.empty:
-            continue
+    # Add each macro-region as a separate interactive trace
+    for region in ordered_regions:
+        sub = valid_geo[valid_geo['macro_region'] == region]
+        n_samples = len(sub)
+        color = REGION_COLORS.get(region, '#64748b')
 
         site_names = sub['sitename'].fillna('N/A').astype(str)
         elevations = sub['elevation'].fillna(-999).round(0).astype(int)
@@ -84,22 +106,23 @@ def generate_country_accession_map():
             customdata=custom_data,
             hovertemplate=(
                 "<b>%{customdata[0]}</b> (ID: %{customdata[1]})<br>"
-                "<b>Country:</b> %{customdata[2]}<br>"
-                "<b>Site:</b> %{customdata[3]}<br>"
+                f"<b>Region:</b> {region}<br>"
+                "<b>Country:</b> %{customdata[2]} (%{customdata[3]})<br>"
                 "<b>Stock:</b> %{customdata[5]}<br>"
+                "<b>Elevation:</b> %{customdata[4]} m<br>"
                 "<b>Coordinates:</b> %{lat:.3f}°N, %{lon:.3f}°E<extra></extra>"
             ),
             mode='markers',
-            name=grp,
+            name=f"{region} (n={n_samples})",
             marker=dict(
-                size=6.0,
-                color=color_map[grp],
+                size=6.2,
+                color=color,
                 opacity=0.85,
                 line=dict(width=0.45, color='#ffffff')
             )
         ))
 
-    # Professional Natural Earth projection layout
+    # Refined Natural Earth projection layout
     fig.update_geos(
         projection_type="natural earth",
         showcoastlines=True,
@@ -123,13 +146,13 @@ def generate_country_accession_map():
         title=dict(
             text="<b>Geographic Distribution of <i>Arabidopsis thaliana</i> Accessions</b><br>"
                  "<span style='font-size: 11.5px; font-weight: normal; color: #475569;'>"
-                 f"Sampling sites for 1,003 accessions colored by country of origin (999 geo-referenced sites)</span>",
+                 f"Sampling sites for 1,003 accessions across 10 biogeographic macro-regions (999 geo-referenced sites)</span>",
             x=0.03,
             y=0.96,
             font=dict(size=14, family="sans-serif", color="#0f172a")
         ),
         legend=dict(
-            title=dict(text="<b>Country of Origin</b>", font=dict(size=11, family="sans-serif")),
+            title=dict(text="<b>Macro-Region</b>", font=dict(size=11, family="sans-serif")),
             orientation="v",
             yanchor="middle",
             y=0.5,
@@ -137,12 +160,12 @@ def generate_country_accession_map():
             x=1.01,
             font=dict(size=9.5, family="sans-serif"),
             itemsizing="constant",
-            bgcolor="rgba(255,255,255,0.8)",
+            bgcolor="rgba(255,255,255,0.85)",
             bordercolor="#e2e8f0",
             borderwidth=1
         ),
-        margin=dict(l=10, r=160, t=55, b=10),
-        width=1150,
+        margin=dict(l=10, r=180, t=55, b=10),
+        width=1160,
         height=580,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -168,9 +191,9 @@ def generate_country_accession_map():
 
     # Save high-res 300-DPI publication PNG
     fig.write_image(out_png, scale=2)
-    print(f"Generated country-colored interactive map: {out_html}")
-    print(f"Generated country-colored publication figure: {out_png}")
+    print(f"Generated macro-region interactive map: {out_html}")
+    print(f"Generated macro-region publication figure: {out_png}")
 
 
 if __name__ == '__main__':
-    generate_country_accession_map()
+    generate_macro_region_map()
