@@ -45,6 +45,18 @@ def main():
             how='left'
         ).drop(columns=['id'])
 
+    # Merge 1001 Genomes official genetic admixture group
+    admix_path = 'data/1001genomes_admixture_groups.csv'
+    if os.path.exists(admix_path):
+        df_admix = pd.read_csv(admix_path)
+        df_clean = df_clean.merge(
+            df_admix[['id', 'group']],
+            left_on='accession_id',
+            right_on='id',
+            how='left'
+        ).drop(columns=['id']).rename(columns={'group': 'admixture_group'})
+        print("Merged 1001 Genomes genetic admixture groups successfully.")
+
     # Save cleaned CSV
     out_csv = 'data/processed/phenotype_clean.csv'
     df_clean.to_csv(out_csv, index=False)
