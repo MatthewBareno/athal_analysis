@@ -101,23 +101,41 @@ Tools required in PATH:
 
 ---
 
-## Analysis Roadmap
+## Completed Analysis Pipeline & Milestones
 
-1. **[Completed] Data Prep:** VCF subsetting, biallelic SNP extraction, missingness & MAF filtering, phenotype deduplication.
-2. **[Completed] Population Structure (`scripts/analyze_popgen.py`):**
-   - LD pruning (`plink2 --indep-pairwise 50 10 0.2` → 397,850 SNPs)
-   - Principal Component Analysis (`plink2 --pca 20`, PC1: 11.67%, PC2: 9.24%)
-   - Unsupervised K-means clustering (optimum at $K=9$, Silhouette score = 0.5261)
-   - ADMIXTURE ancestry modeling ($K=9$ stacked barplot across 1,003 accessions)
-   - High-resolution 3-panel composite publication figure
-3. **[Next] GWAS:**
-   - Linear model with PC covariates (PLINK 2 / statsmodels)
-   - Linear Mixed Model / kinship matrix (GEMMA / GCTA)
-   - Manhattan and QQ plots, significant peak identification
-4. **Quantitative & Evolutionary Genetics:**
-   - Polygenic scores (PRS) and additive genetic variance ($V_A$)
-   - Narrow-sense heritability ($h^2$)
-   - Divergent selection tests ($Q_{ST} - F_{ST}$ / $Q_X$)
+1. **[Completed] Data Preparation & QC:**
+   - Biallelic SNP filtering, 90% genotyping call rate, MAF ≥ 0.01 → **1,694,941 high-quality SNPs**.
+   - Harmonization and deduplication with AraPheno study 12 → **1,003 accessions** with complete FT10 and genotype data.
+   - Interactive & publication world accession maps ([`results/accession_world_map.png`](results/accession_world_map.png)).
+2. **[Completed] Population Genetics & Ancestry Modeling (`scripts/analyze_popgen.py`):**
+   - LD pruning (`50 10 0.2` in PLINK 2) → **397,850 neutral SNPs**.
+   - PCA (20 PCs): PC1 (11.67%), PC2 (9.24%), capturing Iberian/Relict and North-South gradients.
+   - Unsupervised K-means clustering ($K=9$, Silhouette score = 0.5261).
+   - Global ADMIXTURE ancestry modeling ($K=9$ stacked barplot).
+   - Pharmacogenetics-style Multi-PC AUC diagnostic matrix ([`results/popgen/pca_auc_matrix.png`](results/popgen/pca_auc_matrix.png)).
+3. **[Completed] GWAS & Fine Mapping Methodology (`scripts/analyze_gwas.py`, `scripts/plot_clear_loco_manhattan.py`):**
+   - **Model A (GLM + 10 PCs)**: Discovered *FT*, *DOG1*, *VIN3*, but exhibited severe residual inflation ($\lambda_{GC} = 2.44$).
+   - **Model B (GEMMA Whole-Genome LMM)**: Controlled inflation ($\lambda_{GC} = 1.09$) via kinship matrix $\mathbf{K}$, but suffered proximal contamination.
+   - **Model C (GEMMA LOCO LMM)**: Solved proximal contamination using leave-one-chromosome-out kinship matrices ($\lambda_{GC} = 1.108$).
+   - **Model D (Conditioned Stepwise MLMM)**: Unmasked ***FLC* (*FLOWERING LOCUS C*)** at $P = 1.12 \times 10^{-22}$ and a secondary peak on Chr 2 ($P = 6.49 \times 10^{-18}$) after conditioning on lead QTLs.
+   - Aligned publication Manhattan & QQ plots ([`results/gwas/ft10_loco_manhattan_clear.png`](results/gwas/ft10_loco_manhattan_clear.png)).
+4. **[Completed] Genomic Prediction & Polygenic Scoring (`scripts/compute_polygenic_scores.py`):**
+   - Narrow-sense heritability estimation: $h^2 = 88.06\%$.
+   - **4-QTL Model (*FT*, *DOG1*, *VIN3*, *FLC*)**: 5-fold CV $R^2 = 42.93\%$, Pearson $r = 0.655$, MAE $= 10.72$ days.
+   - **Whole-Genome GBLUP**: 5-fold CV $R^2 = \mathbf{66.64\%}$, Pearson $r = \mathbf{0.8173}$, MAE $= \mathbf{7.72}$ days.
+   - Full individual scoring table for all 1,003 accessions ([`data/processed/athal_1003_polygenic_scores.csv`](data/processed/athal_1003_polygenic_scores.csv)).
+   - Publication genomic prediction figure ([`results/prs/polygenic_score_evaluation.png`](results/prs/polygenic_score_evaluation.png)).
+5. **[Completed] Macro-Regional ANOVA & Contrasts (`scripts/anova_prs_populations.py`):**
+   - Fisher's One-Way ANOVA: $F(9, 993) = 136.11$, $P = 1.55 \times 10^{-166}$, $\eta^2 = 55.23\%$.
+   - Welch's heteroscedastic ANOVA: $A = 638.03$, $P = 1.43 \times 10^{-131}$.
+   - 45 pairwise contrasts: 34 significant under Tukey HSD, 38 significant under Benjamini-Hochberg FDR ($q < 0.05$).
+   - Publication contrasts figure ([`results/prs/pgs_population_contrasts.png`](results/prs/pgs_population_contrasts.png)).
+6. **[Completed] Evolutionary Tests of Divergent Selection (`scripts/test_divergent_selection.py`):**
+   - **$Q_{ST} - F_{ST}$ Test**: $Q_{ST} = 0.5786$ vs weighted neutral $F_{ST} = 0.1210$ ($4.8\times$ excess variance ratio, $P < 10^{-20}$), proving selection over drift.
+   - **Berg & Coop (2014) $Q_X$ Polygenic Test**: Overall $Q_X = 296.07$ ($df = 9$), $P_{\text{drift}} < 10^{-50}$ (7 / 9 kinship PCs show significant adaptive divergence).
+   - **Causal QTL $F_{ST}$ Outlier Scan**: *FLC* peak locus has $F_{ST} = 0.7578$ (**top 0.04% of genome**, empirical $P = 0.0004$), *VIN3* top 2.8%, *DOG1* top 3.6%.
+   - **Latitudinal Adaptive Gradient**: $+1.50$ days / °N latitude ($r = 0.650, P < 10^{-100}$).
+   - Publication composite figure ([`results/prs/divergent_selection_tests.png`](results/prs/divergent_selection_tests.png)).
 
 ---
 
