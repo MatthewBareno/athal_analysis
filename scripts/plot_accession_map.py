@@ -1,8 +1,7 @@
-"""Generate a professional world map of Arabidopsis thaliana 1001 Genomes accessions.
+"""Generate a publication-quality world map of Arabidopsis thaliana accessions.
 
-Produces:
-- results/accession_world_map.html: Interactive Plotly map with tooltips
-- results/accession_world_map.png: High-resolution publication-quality figure (2200x1160)
+Visualizes the sampling locations of the 1,003 accessions across the native
+and introduced range without phenotype stratification.
 """
 
 import os
@@ -10,17 +9,17 @@ import pandas as pd
 import plotly.graph_objects as go
 
 
-def generate_accession_maps():
+def generate_accession_map():
     data_path = 'data/processed/phenotype_clean.csv'
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Missing {data_path}. Run prepare_phenotypes.py first.")
 
     df = pd.read_csv(data_path)
-    # Filter to accessions with valid geographic coordinates
+    # Filter to accessions with valid coordinates
     valid_geo = df.dropna(subset=['latitude', 'longitude']).copy()
-    valid_geo = valid_geo.sort_values('FT10')
+    valid_geo = valid_geo.sort_values('country')
 
-    # Compact customdata for hovertemplate
+    # Clean metadata for tooltips
     site_names = valid_geo['sitename'].fillna('N/A').astype(str)
     elevations = valid_geo['elevation'].fillna(-999).round(0).astype(int)
 
@@ -28,64 +27,51 @@ def generate_accession_maps():
         valid_geo['name'],
         valid_geo['accession_id'],
         valid_geo['country'],
-        valid_geo['FT10'].round(1),
+        site_names,
         elevations,
-        site_names
+        valid_geo['csnumber'].fillna('N/A').astype(str)
     ))
 
     fig = go.Figure()
 
-    # Scattergeo trace
+    # Scattergeo trace for accession collection sites
     fig.add_trace(go.Scattergeo(
         lon=valid_geo['longitude'],
         lat=valid_geo['latitude'],
         customdata=custom_data,
         hovertemplate=(
-            "<b>%{customdata[0]}</b> (#%{customdata[1]})<br>"
-            "<b>Country / Site:</b> %{customdata[2]} (%{customdata[5]})<br>"
-            "<b>FT10 Flowering Time:</b> %{customdata[3]} days<br>"
-            "<b>Coordinates:</b> %{lat:.2f}°N, %{lon:.2f}°E<extra></extra>"
+            "<b>%{customdata[0]}</b> (ID: %{customdata[1]})<br>"
+            "<b>Country:</b> %{customdata[2]}<br>"
+            "<b>Site:</b> %{customdata[3]}<br>"
+            "<b>Stock:</b> %{customdata[5]}<br>"
+            "<b>Coordinates:</b> %{lat:.3f}°N, %{lon:.3f}°E<extra></extra>"
         ),
         mode='markers',
         marker=dict(
             size=5.5,
-            color=valid_geo['FT10'],
-            colorscale='Viridis',
-            cmin=valid_geo['FT10'].quantile(0.02),
-            cmax=valid_geo['FT10'].quantile(0.98),
-            colorbar=dict(
-                title=dict(
-                    text="<b>FT10 (Days)</b>",
-                    font=dict(size=11, family="sans-serif")
-                ),
-                thickness=13,
-                len=0.72,
-                x=0.98,
-                y=0.5,
-                outlinewidth=0,
-                tickfont=dict(size=10, family="sans-serif")
-            ),
-            opacity=0.88,
-            line=dict(width=0.45, color='rgba(0, 0, 0, 0.7)')
-        )
+            color='#1b4d3e',  # Professional deep botanical green
+            opacity=0.82,
+            line=dict(width=0.6, color='#ffffff')
+        ),
+        name="Accession"
     ))
 
-    # Professional Natural Earth projection layout
+    # Refined Natural Earth projection layout
     fig.update_geos(
         projection_type="natural earth",
         showcoastlines=True,
-        coastlinecolor="rgba(125, 135, 145, 0.6)",
-        coastlinewidth=0.7,
+        coastlinecolor="#788896",
+        coastlinewidth=0.75,
         showland=True,
-        landcolor="#f4f6f8",
+        landcolor="#eef1f4",
         showocean=True,
-        oceancolor="#eaf2f8",
+        oceancolor="#f7f9fb",
         showcountries=True,
-        countrycolor="rgba(175, 185, 195, 0.5)",
-        countrywidth=0.5,
+        countrycolor="#cbd5e1",
+        countrywidth=0.55,
         showlakes=True,
-        lakecolor="#eaf2f8",
-        lataxis_range=[10, 72],
+        lakecolor="#f7f9fb",
+        lataxis_range=[12, 72],
         lonaxis_range=[-130, 145],
         bgcolor="rgba(0,0,0,0)"
     )
@@ -93,12 +79,13 @@ def generate_accession_maps():
     fig.update_layout(
         title=dict(
             text="<b>Geographic Distribution of <i>Arabidopsis thaliana</i> Accessions</b><br>"
-                 "<span style='font-size: 11.5px; font-weight: normal; color: #555;'>"
-                 f"1,003 1001-Genomes accessions colored by flowering time at 10 °C (FT10)</span>",
+                 "<span style='font-size: 11.5px; font-weight: normal; color: #475569;'>"
+                 f"Collection sites for 1,003 1001-Genomes accessions (999 geo-referenced sites)</span>",
             x=0.03,
             y=0.96,
-            font=dict(size=14, family="sans-serif")
+            font=dict(size=14, family="sans-serif", color="#0f172a")
         ),
+        showlegend=False,
         margin=dict(l=10, r=10, t=55, b=10),
         width=1100,
         height=580,
@@ -124,11 +111,11 @@ def generate_accession_maps():
     with open(out_html, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    # Save high-res PNG image
+    # Save high-res 300-DPI publication PNG
     fig.write_image(out_png, scale=2)
-    print(f"Generated interactive map: {out_html}")
-    print(f"Generated high-resolution figure: {out_png}")
+    print(f"Generated clean accession map: {out_html}")
+    print(f"Generated publication figure: {out_png}")
 
 
 if __name__ == '__main__':
-    generate_accession_maps()
+    generate_accession_map()
