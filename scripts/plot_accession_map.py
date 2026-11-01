@@ -1,7 +1,7 @@
-"""Generate a clean, publication-quality world map of Arabidopsis thaliana accessions.
+"""Generate a clean, publication-quality world map of Arabidopsis thaliana accessions using black dots.
 
 Visualizes the sampling locations of the 1,003 accessions across the globe using
-a single high-contrast, uniform marker aesthetic on a Natural Earth projection.
+solid black dot markers on a Natural Earth projection.
 
 Outputs:
 - results/accession_world_map.html: Interactive Plotly map with tooltips
@@ -13,7 +13,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 
-def generate_unified_accession_map():
+def generate_black_dot_map():
     data_path = 'data/processed/phenotype_clean.csv'
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Missing {data_path}. Run prepare_phenotypes.py first.")
@@ -37,7 +37,7 @@ def generate_unified_accession_map():
 
     fig = go.Figure()
 
-    # Unified scattergeo trace for all accession collection sites
+    # Scattergeo trace with black dots
     fig.add_trace(go.Scattergeo(
         lon=valid_geo['longitude'],
         lat=valid_geo['latitude'],
@@ -52,10 +52,10 @@ def generate_unified_accession_map():
         ),
         mode='markers',
         marker=dict(
-            size=5.5,
-            color='#c0392b',  # Classic publication vermilion / crimson
-            opacity=0.82,
-            line=dict(width=0.5, color='#ffffff')
+            size=5.0,
+            color='#0f172a',  # Solid black / deep obsidian
+            opacity=0.80,
+            line=dict(width=0.4, color='#ffffff')
         ),
         showlegend=False
     ))
@@ -117,9 +117,9 @@ def generate_unified_accession_map():
 
     # Save high-res 300-DPI publication PNG
     fig.write_image(out_png, scale=2)
-    print(f"Generated clean uncolored accession map: {out_html}")
+    print(f"Generated black dot accession map: {out_html}")
     print(f"Generated publication figure: {out_png}")
 
 
 if __name__ == '__main__':
-    generate_unified_accession_map()
+    generate_black_dot_map()
