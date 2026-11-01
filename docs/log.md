@@ -52,6 +52,11 @@
   - 4,151,104 variants excluded with MAF < 0.01 (`--maf 0.01`).
   - Final filtered dataset: **1,694,941 high-confidence biallelic SNPs** across 1,003 accessions.
   - Generated canonical datasets: `data/processed/athal_1003_qc.pgen` (189 MB) / `.pvar` (75 MB) / `.psam` (7.9 KB) and `data/processed/athal_1003_qc.bed` (406 MB) / `.bim` (51 MB) / `.fam` (16 KB).
+- Deleted legacy mapping script (`scripts/map_samples.py`) and output (`results/sample_map.html`).
+- Created `scripts/plot_accession_map.py` and generated publication-grade Natural Earth world maps:
+  - Interactive web visual: `results/accession_world_map.html` (compact customdata, FT10 gradient, country/elevation tooltips).
+  - High-resolution 2200x1160 figure: `results/accession_world_map.png`.
+
 
 
 

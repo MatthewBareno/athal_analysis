@@ -32,12 +32,13 @@ athal_analysis/
 ├── envs/
 │   └── environment.yml            # Conda / mamba environment specification
 ├── results/
-│   └── sample_map.html            # Interactive geographic distribution of accessions
+│   ├── accession_world_map.html   # Professional interactive world map of accessions
+│   └── accession_world_map.png    # High-resolution (2200x1160) publication map figure
 └── scripts/
     ├── download_data.sh           # Downloads 1001G v3.1 VCF and verifies MD5
     ├── prepare_phenotypes.py      # Deduplicates & formats phenotypes for the 1,003 accessions
     ├── prep_genotypes.sh          # Subsets VCF, applies QC filters, and creates PLINK files
-    └── map_samples.py             # Generates Plotly map of accession locations
+    └── plot_accession_map.py      # Generates publication world maps (HTML & PNG)
 ```
 
 ---
