@@ -1,12 +1,13 @@
 """Generate a publication-quality world map of Arabidopsis thaliana accessions colored by country.
 
-Includes all 45 countries of origin in a clean multi-column legend ordered by sample size.
+Includes all 45 countries of origin in a full bottom multi-column legend.
 
 Outputs:
-- results/accession_world_map.html: Interactive Plotly map with tooltips and 45-country legend
-- results/accession_world_map.png: High-resolution (2560x1240, 300-DPI) publication figure
+- results/accession_world_map.html: Interactive Plotly map with tooltips and all 45 countries
+- results/accession_world_map.png: High-resolution (2200x1500, 300-DPI) publication figure
 """
 
+import json
 import os
 import pandas as pd
 import plotly.express as px
@@ -32,7 +33,7 @@ def generate_all_countries_map():
 
     fig = go.Figure()
 
-    # Add each country as a distinct trace so all 45 appear in the legend
+    # Add each country as a distinct trace
     for country in ordered_countries:
         sub = valid_geo[valid_geo['country'] == country]
         n_samples = len(sub)
@@ -64,9 +65,9 @@ def generate_all_countries_map():
             mode='markers',
             name=f"{country} ({n_samples})",
             marker=dict(
-                size=5.5,
+                size=6.0,
                 color=color_map[country],
-                opacity=0.85,
+                opacity=0.88,
                 line=dict(width=0.4, color='#ffffff')
             )
         ))
@@ -78,48 +79,43 @@ def generate_all_countries_map():
         coastlinecolor="#788896",
         coastlinewidth=0.75,
         showland=True,
-        landcolor="#eef1f4",
+        landcolor="#f0f2f5",
         showocean=True,
-        oceancolor="#f7f9fb",
+        oceancolor="#e2eaf2",
         showcountries=True,
         countrycolor="#cbd5e1",
         countrywidth=0.55,
         showlakes=True,
-        lakecolor="#f7f9fb",
-        lataxis_range=[12, 72],
-        lonaxis_range=[-130, 145],
-        bgcolor="rgba(0,0,0,0)"
+        lakecolor="#e2eaf2",
+        lataxis_range=[10, 72],
+        lonaxis_range=[-128, 145]
     )
 
     fig.update_layout(
         title=dict(
             text="<b>Geographic Distribution of <i>Arabidopsis thaliana</i> Accessions</b><br>"
-                 "<span style='font-size: 11px; font-weight: normal; color: #475569;'>"
-                 "Sampling locations of 1,003 accessions colored across all 45 countries of origin (999 geo-referenced sites)</span>",
+                 "<span style='font-size: 11.5px; font-weight: normal; color: #475569;'>"
+                 "Sampling locations of 1,003 accessions across all 45 countries of origin (999 geo-referenced sites)</span>",
             x=0.02,
-            y=0.97,
+            y=0.98,
             font=dict(size=14, family="sans-serif", color="#0f172a")
         ),
         legend=dict(
-            title=dict(text="<b>Country (n)</b>", font=dict(size=10, family="sans-serif")),
-            orientation="v",
-            yanchor="top",
-            y=0.98,
-            xanchor="left",
-            x=1.01,
-            entrywidth=78,
+            orientation="h",
+            entrywidth=92,
             entrywidthmode="pixels",
-            font=dict(size=8, family="sans-serif"),
-            itemsizing="constant",
-            bgcolor="rgba(255,255,255,0.85)",
-            bordercolor="#e2e8f0",
-            borderwidth=1
+            yanchor="top",
+            y=-0.06,
+            xanchor="left",
+            x=0.01,
+            font=dict(size=9.0, family="sans-serif"),
+            itemsizing="constant"
         ),
-        margin=dict(l=10, r=260, t=55, b=10),
-        width=1280,
-        height=620,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=10, r=10, t=55, b=170),
+        width=1120,
+        height=740,
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
         font=dict(family="sans-serif")
     )
 
@@ -144,6 +140,11 @@ def generate_all_countries_map():
     fig.write_image(out_png, scale=2)
     print(f"Generated 45-country interactive map: {out_html}")
     print(f"Generated 45-country publication figure: {out_png}")
+
+    # Also save metadata for HTML grid legend
+    legend_meta = [{'country': c, 'count': int(country_counts[c]), 'color': color_map[c]} for c in ordered_countries]
+    with open('results/legend_metadata.json', 'w') as f:
+        json.dump(legend_meta, f, indent=2)
 
 
 if __name__ == '__main__':
