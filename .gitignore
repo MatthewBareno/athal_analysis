@@ -12,4 +12,7 @@
 *.log
 *.prune.in
 *.prune.out
+output/
+*.assoc.txt
+*.glm.linear
 

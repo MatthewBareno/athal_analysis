@@ -86,6 +86,30 @@
   - **Panel (b)**: 5-fold cross-validated One-vs-Rest ROC-AUC across PCs 1 to 10 for each genetic ancestry group.
   - Saved outputs: `results/popgen/pca_auc_biogeographic_system.png` and `results/popgen/pca_ovr_auc_results.csv`.
 
+## 2026-10-31: Genome-Wide Association Study (GWAS) Accounting for Population Structure
+
+- **Phenotype & Covariates Setup**:
+  - Target trait: FT10 (flowering time at 10 °C) across 1,003 accessions.
+  - Synchronized `.fam` and `.psam` formats (`ft10_pheno_plink2.txt`, `ft10_pheno_gemma.txt`).
+- **Model 1: PLINK 2 GLM with 10 PC Covariates**:
+  - Tested 1,694,941 SNPs with `--glm allow-no-covars hide-covar`.
+  - Top hits at ***DOG1*** ($P = 5.70 \times 10^{-29}$) and ***FLC*** ($P = 1.40 \times 10^{-27}$).
+  - Genomic inflation factor: $\lambda_{GC} = 2.6738$, demonstrating that continental PCs alone leave residual cryptic relatedness uncorrected.
+- **Model 2: GEMMA Linear Mixed Model (LMM with Kinship Matrix)**:
+  - Calculated 1003x1003 centered relatedness matrix (`output/athal_1003_kinship.cXX.txt`).
+  - Fit univariate LMM with REMLE variance estimation (`-lmm 4`).
+  - **Narrow-sense Heritability ($h^2$ / PVE)**: **$88.06\% \pm 2.15\%$** ($V_g = 607.32, V_e = 20.41$).
+  - **Genomic Inflation Controlled**: $\lambda_{GC} = 0.9794$, demonstrating near-perfect calibration.
+  - **Genome-Wide Significant Peaks ($P < 7.31 \times 10^{-8}$)**:
+    1. ***FT*** (*FLOWERING LOCUS T*, Chr 1: 24,339,560): $P = 1.46 \times 10^{-9}$ ($\beta = +2.64$ days). Master mobile florigen signal.
+    2. ***DOG1*** (*DELAY OF GERMINATION 1*, Chr 5: 18,590,327): $P = 2.46 \times 10^{-9}$ ($\beta = +3.19$ days). Low-temperature flowering and seed dormancy.
+    3. ***VIN3*** (*VERNALIZATION INSENSITIVE 3*, Chr 5: 23,288,908): $P = 8.25 \times 10^{-10}$ ($\beta = +8.42$ days). Epigenetic vernalization histone modifier.
+- **Generated Assets (`results/gwas/`)**:
+  - `gwas_glm_vs_lmm_comparison.png`: 4-panel figure comparing GLM (10 PCs) and LMM (Kinship Matrix) Manhattan & QQ plots.
+  - `ft10_gemma_lmm_manhattan_qq.png`: Standalone publication Manhattan and QQ plot for the Linear Mixed Model.
+  - `ft10_gemma_lmm_significant_snps.csv`: Lead significant SNPs with betas, standard errors, and allele frequencies.
+  - `ft10_gemma_lmm.html` & `ft10_plink2_glm_pc10.html`: Interactive WebGL Manhattan plots.
+
 
 
 
