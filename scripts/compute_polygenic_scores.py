@@ -171,12 +171,15 @@ def plot_pgs_figures(df_scores, df_metrics):
 
     # Annotation badge
     mae = mean_absolute_error(y_obs, y_pred)
+    badge_text = (
+        "5-Fold Cross-Validation\n"
+        rf"$R^2 = {r_val**2:.3f}$" + "\n"
+        rf"Pearson $r = {r_val:.3f}$" + "\n"
+        f"MAE = {mae:.2f} days"
+    )
     ax1.text(
         0.05, 0.93,
-        f"$\\mathbf{{5\\text{{-Fold Cross-Validation}}}}\n"
-        f"R^2 = \\mathbf{{{r_val**2:.3f}}}\n"
-        f"\\text{{Pearson }} r = \\mathbf{{{r_val:.3f}}}\n"
-        f"\\text{{MAE}} = \\mathbf{{{mae:.2f}\\text{{ days}}}}$",
+        badge_text,
         transform=ax1.transAxes,
         fontsize=9.5, fontweight='bold', va='top',
         bbox=dict(boxstyle='round,pad=0.4', facecolor='#f8fafc', edgecolor='#cbd5e1', lw=1.0)

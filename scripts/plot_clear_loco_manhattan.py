@@ -166,7 +166,7 @@ def plot_side_by_side_manhattan(df):
     ax_m.set_xticklabels([f"Chromosome {c}" for c in chroms], fontsize=10, fontweight='bold')
     ax_m.set_xlim(-800000, curr)
     ax_m.set_ylim(0, y_max)
-    ax_m.set_ylabel(r"$-\log_{10}(P\text{-value})$", fontsize=11, fontweight='bold')
+    ax_m.set_ylabel(r"$-\log_{10}(P\mathrm{-value})$", fontsize=11, fontweight='bold')
     ax_m.set_title("A   Genome-Wide Association Scan: Flowering Time (FT10) — GEMMA LOCO LMM", fontsize=12, fontweight='bold', loc='left')
     ax_m.legend(loc='upper right', frameon=True, edgecolor='#cbd5e1', facecolor='#ffffff', framealpha=0.95, fontsize=8.5)
     ax_m.grid(True, linestyle=':', alpha=0.35, color='#cbd5e1')
@@ -212,9 +212,13 @@ def plot_side_by_side_manhattan(df):
         ax_qq.scatter(exp[sig_idx], obs[sig_idx], c='#dc2626', s=24, alpha=0.95, edgecolors='#450a0a', linewidth=0.3, zorder=5)
         
     # Add lambda_GC badge
+    badge_qq = (
+        rf"$\mathbf{{\lambda_{{GC}} = {lambda_gc:.3f}}}$" + "\n"
+        "(Well-Calibrated)"
+    )
     ax_qq.text(
         0.06, 0.90,
-        f"$\\mathbf{{\\lambda_{{GC}} = {lambda_gc:.3f}}}$\n$\\text{{(Well-Calibrated)}}$",
+        badge_qq,
         transform=ax_qq.transAxes,
         fontsize=9.5,
         fontweight='bold',
