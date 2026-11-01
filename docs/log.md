@@ -128,6 +128,11 @@
   - Successfully unmasked ***FLC* (*FLOWERING LOCUS C*, Chr 5: 3,188,327)** as the top global lead peak with **$P = 1.12 \times 10^{-22}$**, and revealed a secondary peak on Chr 2 (`2:9583341:T:A`, $P = 6.49 \times 10^{-18}$).
 - **4-Model Methodology Figure (`results/gwas/gwas_4model_methodology_comparison.png`)**:
   - Synthesized the complete progression (A: GLM, B: Whole-Genome LMM, C: LOCO LMM, D: Conditioned MLMM) into a unified publication graphic.
+- **Publication-Grade Aligned LOCO Manhattan & QQ Figure**:
+  - Created `scripts/plot_clear_loco_manhattan.py` producing a high-impact, side-by-side figure:
+    - **Panel A (Manhattan, 75% width)**: Alternating Slate/Azure chromosomal tracks, bold vermilion significant points, and highlighted callout badges for ***FT*** ($-\log_{10} P = 8.56$), ***DOG1*** ($-\log_{10} P = 10.06$), and ***VIN3*** ($-\log_{10} P = 10.89$).
+    - **Panel B (QQ Plot, 25% width)**: Aligned to the exact same vertical $-\log_{10} P$ axis range ($0 \dots 12.5$), with 95% concentration band and $\lambda_{GC} = 1.108$ badge.
+  - Saved outputs: `results/gwas/ft10_loco_manhattan_clear.png` and interactive `results/gwas/ft10_loco_manhattan_clear.html`.
 
 
 
