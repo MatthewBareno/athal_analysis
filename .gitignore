@@ -10,4 +10,6 @@
 *.psam
 .venv/
 *.log
+*.prune.in
+*.prune.out
 

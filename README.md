@@ -32,13 +32,21 @@ athal_analysis/
 ├── envs/
 │   └── environment.yml            # Conda / mamba environment specification
 ├── results/
-│   ├── accession_world_map.html   # Professional interactive world map of accessions
-│   └── accession_world_map.png    # High-resolution (2200x1160) publication map figure
+│   ├─- accession_world_map.html   # Professional interactive world map of accessions
+│   ├─- accession_world_map.png    # High-resolution (2200x1160) publication map figure
+│   └─- popgen/                    # Population genetics figures and evaluation
+│       ├─- pca_admixture_composite.png # Nature-style 3-panel figure (PCA, K-means, ADMIXTURE)
+│       ├─- pca_pc1_pc2.html       # Interactive WebGL PCA scatter plot
+│       ├─- pca_pc1_pc2.png        # Publication PCA plot (300 DPI)
+│       ├─- kmeans_evaluation.png  # Silhouette score and Inertia elbow plot
+│       ├─- admixture_barplot_k9.png # K=9 ADMIXTURE stacked barplot
+│       └─- kmeans_concordance.csv # K-means cluster vs lineage cross-tabulation
 └── scripts/
     ├── download_data.sh           # Downloads 1001G v3.1 VCF and verifies MD5
     ├── prepare_phenotypes.py      # Deduplicates & formats phenotypes for the 1,003 accessions
     ├── prep_genotypes.sh          # Subsets VCF, applies QC filters, and creates PLINK files
-    └── plot_accession_map.py      # Generates publication world maps (HTML & PNG)
+    ├── plot_accession_map.py      # Generates publication world maps (HTML & PNG)
+    └── analyze_popgen.py          # LD pruning, PLINK2 PCA, K-means & ADMIXTURE analysis
 ```
 
 ---
@@ -96,12 +104,13 @@ Tools required in PATH:
 ## Analysis Roadmap
 
 1. **[Completed] Data Prep:** VCF subsetting, biallelic SNP extraction, missingness & MAF filtering, phenotype deduplication.
-2. **[Next] Population Structure:**
-   - LD pruning (`plink2 --indep-pairwise 50 10 0.2`)
-   - Principal Component Analysis (`plink2 --pca`)
-   - Population ancestry modeling (ADMIXTURE / k-means)
-   - Pairwise $F_{ST}$ and heterozygosity across geographic origins
-3. **GWAS:**
+2. **[Completed] Population Structure (`scripts/analyze_popgen.py`):**
+   - LD pruning (`plink2 --indep-pairwise 50 10 0.2` → 397,850 SNPs)
+   - Principal Component Analysis (`plink2 --pca 20`, PC1: 11.67%, PC2: 9.24%)
+   - Unsupervised K-means clustering (optimum at $K=9$, Silhouette score = 0.5261)
+   - ADMIXTURE ancestry modeling ($K=9$ stacked barplot across 1,003 accessions)
+   - High-resolution 3-panel composite publication figure
+3. **[Next] GWAS:**
    - Linear model with PC covariates (PLINK 2 / statsmodels)
    - Linear Mixed Model / kinship matrix (GEMMA / GCTA)
    - Manhattan and QQ plots, significant peak identification

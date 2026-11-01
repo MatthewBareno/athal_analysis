@@ -57,6 +57,30 @@
   - Interactive web visual: `results/accession_world_map.html` (compact customdata, FT10 gradient, country/elevation tooltips).
   - High-resolution 2200x1160 figure: `results/accession_world_map.png`.
 
+## 2026-10-31: Population Genetics & Population Structure (PCA, K-means, ADMIXTURE)
+
+- **LD Pruning (`scripts/analyze_popgen.py` via PLINK 2)**:
+  - Executed `--indep-pairwise 50 10 0.2` across 1,694,941 filtered SNPs.
+  - Retained **397,850 independent, linkage-pruned biallelic SNPs** (`athal_1003_ld.prune.in`).
+- **Principal Component Analysis (PLINK 2)**:
+  - Calculated top 20 eigenvectors and eigenvalues (`athal_1003_pca.eigenvec`, `athal_1003_pca.eigenval`).
+  - **PC1 (11.67% variance)**: Isolates the East/Central Asian lineage (+0.104) from the European metapopulation.
+  - **PC2 (9.24% variance)**: Separates ancestral Iberian Relict accessions (-0.135) and Spain from Northern and Central Europe.
+  - **PC3 (7.18% variance)**: Delineates North Sweden (+0.093) from Italy/Balkans/Caucasus (-0.043).
+- **Unsupervised K-Means Clustering (`scikit-learn`)**:
+  - Clustered accessions along top 10 PCs across $K = 2 \dots 12$.
+  - Calculated Inertia (WCSS) and Silhouette Score per $K$.
+  - Found a sharp global peak at **$K = 9$ (Silhouette Score = 0.5261)** with a steep elbow in inertia, objectively confirming the 9 evolutionary lineages identified in Alonso-Blanco et al. (*Cell* 2016).
+  - Generated concordance matrix (`results/popgen/kmeans_concordance.csv`) proving tight correspondence with biological ancestry groups (e.g., 67/69 Asian accessions clustered into a single pure cluster; North Sweden 60/61 pure).
+- **ADMIXTURE Analysis & Visualizations**:
+  - Mapped official 1001 Genomes ADMIXTURE ancestry $Q$-matrix ($K = 9$) across all 1,003 accessions.
+  - Generated 300-DPI publication figures in `results/popgen/`:
+    - `pca_admixture_composite.png`: High-resolution 3-panel publication visual (A: PCA scatter, B: K-means Silhouette/Elbow evaluation, C: Global ADMIXTURE stacked barplot).
+    - `pca_pc1_pc2.html` & `pca_pc1_pc2.png`: Interactive WebGL scatter plot and 300-DPI static plot.
+    - `kmeans_evaluation.png`: Dual-axis plot of Silhouette Score and Inertia elbow.
+    - `admixture_barplot_k9.png`: Standalone high-res ADMIXTURE barplot.
+  - Merged popgen covariates into canonical table `data/processed/athal_1003_pca_kmeans.csv`.
+
 
 
 
