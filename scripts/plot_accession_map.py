@@ -1,19 +1,19 @@
-"""Generate a clean, publication-quality world map of Arabidopsis thaliana accessions using black dots.
+"""Generate a publication-quality world map of Arabidopsis thaliana accessions colored by country.
 
-Visualizes the sampling locations of the 1,003 accessions across the globe using
-solid black dot markers on a Natural Earth projection.
+Includes all 45 countries of origin in a clean multi-column legend ordered by sample size.
 
 Outputs:
-- results/accession_world_map.html: Interactive Plotly map with tooltips
-- results/accession_world_map.png: High-resolution (2200x1160, 300-DPI) publication figure
+- results/accession_world_map.html: Interactive Plotly map with tooltips and 45-country legend
+- results/accession_world_map.png: High-resolution (2560x1240, 300-DPI) publication figure
 """
 
 import os
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 
-def generate_black_dot_map():
+def generate_all_countries_map():
     data_path = 'data/processed/phenotype_clean.csv'
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Missing {data_path}. Run prepare_phenotypes.py first.")
@@ -21,44 +21,55 @@ def generate_black_dot_map():
     df = pd.read_csv(data_path)
     # Filter to accessions with valid geographic coordinates
     valid_geo = df.dropna(subset=['latitude', 'longitude']).copy()
-    valid_geo = valid_geo.sort_values('country')
 
-    site_names = valid_geo['sitename'].fillna('N/A').astype(str)
-    elevations = valid_geo['elevation'].fillna(-999).round(0).astype(int)
+    # Order countries by accession count descending
+    country_counts = valid_geo['country'].value_counts()
+    ordered_countries = country_counts.index.tolist()
 
-    custom_data = list(zip(
-        valid_geo['name'],
-        valid_geo['accession_id'],
-        valid_geo['country'],
-        site_names,
-        elevations,
-        valid_geo['csnumber'].fillna('N/A').astype(str)
-    ))
+    # Broad qualitative palette providing 50 distinct colors
+    palette = px.colors.qualitative.Alphabet + px.colors.qualitative.Dark24
+    color_map = {c: palette[i % len(palette)] for i, c in enumerate(ordered_countries)}
 
     fig = go.Figure()
 
-    # Scattergeo trace with black dots
-    fig.add_trace(go.Scattergeo(
-        lon=valid_geo['longitude'],
-        lat=valid_geo['latitude'],
-        customdata=custom_data,
-        hovertemplate=(
-            "<b>%{customdata[0]}</b> (ID: %{customdata[1]})<br>"
-            "<b>Country:</b> %{customdata[2]}<br>"
-            "<b>Site:</b> %{customdata[3]}<br>"
-            "<b>Stock:</b> %{customdata[5]}<br>"
-            "<b>Elevation:</b> %{customdata[4]} m<br>"
-            "<b>Coordinates:</b> %{lat:.3f}°N, %{lon:.3f}°E<extra></extra>"
-        ),
-        mode='markers',
-        marker=dict(
-            size=5.0,
-            color='#0f172a',  # Solid black / deep obsidian
-            opacity=0.80,
-            line=dict(width=0.4, color='#ffffff')
-        ),
-        showlegend=False
-    ))
+    # Add each country as a distinct trace so all 45 appear in the legend
+    for country in ordered_countries:
+        sub = valid_geo[valid_geo['country'] == country]
+        n_samples = len(sub)
+
+        site_names = sub['sitename'].fillna('N/A').astype(str)
+        elevations = sub['elevation'].fillna(-999).round(0).astype(int)
+
+        custom_data = list(zip(
+            sub['name'],
+            sub['accession_id'],
+            sub['country'],
+            site_names,
+            elevations,
+            sub['csnumber'].fillna('N/A').astype(str)
+        ))
+
+        fig.add_trace(go.Scattergeo(
+            lon=sub['longitude'],
+            lat=sub['latitude'],
+            customdata=custom_data,
+            hovertemplate=(
+                "<b>%{customdata[0]}</b> (ID: %{customdata[1]})<br>"
+                "<b>Country:</b> %{customdata[2]}<br>"
+                "<b>Site:</b> %{customdata[3]}<br>"
+                "<b>Stock:</b> %{customdata[5]}<br>"
+                "<b>Elevation:</b> %{customdata[4]} m<br>"
+                "<b>Coordinates:</b> %{lat:.3f}°N, %{lon:.3f}°E<extra></extra>"
+            ),
+            mode='markers',
+            name=f"{country} ({n_samples})",
+            marker=dict(
+                size=5.5,
+                color=color_map[country],
+                opacity=0.85,
+                line=dict(width=0.4, color='#ffffff')
+            )
+        ))
 
     # Refined Natural Earth projection layout
     fig.update_geos(
@@ -83,16 +94,30 @@ def generate_black_dot_map():
     fig.update_layout(
         title=dict(
             text="<b>Geographic Distribution of <i>Arabidopsis thaliana</i> Accessions</b><br>"
-                 "<span style='font-size: 11.5px; font-weight: normal; color: #475569;'>"
-                 "Sampling locations of 1,003 accessions from the 1001 Genomes Project (999 geo-referenced sites)</span>",
-            x=0.03,
-            y=0.96,
+                 "<span style='font-size: 11px; font-weight: normal; color: #475569;'>"
+                 "Sampling locations of 1,003 accessions colored across all 45 countries of origin (999 geo-referenced sites)</span>",
+            x=0.02,
+            y=0.97,
             font=dict(size=14, family="sans-serif", color="#0f172a")
         ),
-        showlegend=False,
-        margin=dict(l=10, r=10, t=55, b=10),
-        width=1100,
-        height=580,
+        legend=dict(
+            title=dict(text="<b>Country (n)</b>", font=dict(size=10, family="sans-serif")),
+            orientation="v",
+            yanchor="top",
+            y=0.98,
+            xanchor="left",
+            x=1.01,
+            entrywidth=78,
+            entrywidthmode="pixels",
+            font=dict(size=8, family="sans-serif"),
+            itemsizing="constant",
+            bgcolor="rgba(255,255,255,0.85)",
+            bordercolor="#e2e8f0",
+            borderwidth=1
+        ),
+        margin=dict(l=10, r=260, t=55, b=10),
+        width=1280,
+        height=620,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="sans-serif")
@@ -117,9 +142,9 @@ def generate_black_dot_map():
 
     # Save high-res 300-DPI publication PNG
     fig.write_image(out_png, scale=2)
-    print(f"Generated black dot accession map: {out_html}")
-    print(f"Generated publication figure: {out_png}")
+    print(f"Generated 45-country interactive map: {out_html}")
+    print(f"Generated 45-country publication figure: {out_png}")
 
 
 if __name__ == '__main__':
-    generate_black_dot_map()
+    generate_all_countries_map()
