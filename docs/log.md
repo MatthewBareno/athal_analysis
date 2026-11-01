@@ -158,3 +158,28 @@
 
 
 
+
+## 2026-10-31: Macro-Regional ANOVA and Corrected Multiple Comparisons for Polygenic Scores
+
+- **Statistical Hypothesis & Pipeline (`scripts/anova_prs_populations.py`)**:
+  - Evaluated whether whole-genome polygenic scores (5-fold cross-validated GBLUP days to flowering, $N = 1,003$ accessions) vary systematically across the 10 1001 Genomes macro-regions / genetic lineages: Western Europe ($n=104$), Central Europe ($n=177$), Germany ($n=90$), Italy/Balkans/Caucasus ($n=92$), Asia ($n=69$), Admixed ($n=136$), Spain ($n=110$), Relict ($n=25$), South Sweden ($n=139$), and North Sweden ($n=61$).
+- **One-Way ANOVA Results (`results/prs/pgs_population_anova_stats.csv`)**:
+  - **Fisher's One-Way ANOVA**: **$F(9, 993) = 136.11$**, **$P = 1.55 \times 10^{-166}$**.
+  - **Variance Explained (Effect Size)**: **$\eta^2 = 55.23\%$** ($\omega^2 = 54.80\%$), confirming that more than half of the total variance in whole-genome genetic flowering potential is partitioned between geographic lineages.
+  - **Welch's Heteroscedastic ANOVA (Alexander-Govern)**: **$A = 638.03$**, **$P = 1.43 \times 10^{-131}$** (accounting for variance heterogeneity identified by Levene's test, $W = 11.18, P = 9.33 \times 10^{-17}$).
+- **Pairwise Multiple Comparisons (45 Contrasts, `results/prs/pgs_population_pairwise_comparisons.csv`)**:
+  - **Tukey's Honestly Significant Difference (HSD)**: **34 / 45** pairwise contrasts are statistically significant at FWER $\alpha = 0.05$.
+  - **Benjamini-Hochberg (BH) FDR**: **38 / 45** pairwise contrasts are statistically significant at $q < 0.05$.
+  - **Bonferroni Adjustment**: **33 / 45** pairwise contrasts are statistically significant at $P_{\text{adj}} < 0.05$.
+  - **Holm-Bonferroni Step-Down**: **35 / 45** pairwise contrasts are statistically significant at $P_{\text{adj}} < 0.05$.
+- **Biological & Evolutionary Clines (`results/prs/pgs_population_group_summary.csv`)**:
+  - **Latitudinal & Photoperiod Differentiation**:
+    - **Earliest Flowering Lineages**: Western Europe (mean $= 72.21$ d, $95\%$ CI: $[71.02, 73.40]$) and Central Europe (mean $= 74.49$ d, $95\%$ CI: $[73.54, 75.44]$).
+    - **Intermediate Lineages**: Germany ($77.93$ d), Italy/Balkans/Caucasus ($81.21$ d), Asia ($81.36$ d), Admixed ($82.55$ d), Spain ($83.48$ d), and Relicts ($89.29$ d).
+    - **High-Latitude Vernalization Clines**: South Sweden ($97.91$ d, $95\%$ CI: $[96.54, 99.29]$) and North Sweden ($111.07$ d, $95\%$ CI: $[107.93, 114.22]$).
+    - The most extreme divergence occurs between North Sweden and Western Europe (**$\Delta = +38.86$ days**, Welch $t(77.9) = 23.09$, $P_{\text{FDR}} = 1.58 \times 10^{-35}$, Cohen's $d = 4.37$).
+  - **Non-Significant Contrasts (Stabilized Phenotypic Burden)**:
+    - Intermediate populations form a statistically homogeneous cluster with no significant differences: Italy/Balkans vs Asia ($+0.15$ d, $q = 0.896$), Admixed vs Spain ($+0.93$ d, $q = 0.549$), Asia vs Admixed ($+1.20$ d, $q = 0.314$), Italy/Balkans vs Admixed ($+1.34$ d, $q = 0.302$), and Italy/Balkans vs Spain ($+2.27$ d, $q = 0.144$).
+- **Visuals & Tables (`results/prs/`)**:
+  - `pgs_population_contrasts.png`: Multi-panel publication figure (300 DPI) with population distributions/means, lower-triangular pairwise $-\log_{10}(P_{\text{FDR}})$ significance matrix, and contrast volcano plot.
+  - `pgs_population_contrasts.html`: Interactive dual-panel boxplot and pairwise difference heatmap explorer.
