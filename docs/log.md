@@ -80,6 +80,11 @@
     - `kmeans_evaluation.png`: Dual-axis plot of Silhouette Score and Inertia elbow.
     - `admixture_barplot_k9.png`: Standalone high-res ADMIXTURE barplot.
   - Merged popgen covariates into canonical table `data/processed/athal_1003_pca_kmeans.csv`.
+- **Biogeographic Grouping System Figure (Pharmacogenetics style)**:
+  - Created `scripts/plot_pca_auc_matrix.py` replicating the multi-panel layout from *Clin Pharmacol Ther (2019)*.
+  - **Panel (a)**: 3x3 lower-triangular pairwise PC scatter matrix (PC1 vs PC2, PC1 vs PC3, PC2 vs PC3, PC1 vs PC4, PC2 vs PC4, PC3 vs PC4) colored by ancestry group.
+  - **Panel (b)**: 5-fold cross-validated One-vs-Rest ROC-AUC across PCs 1 to 10 for each genetic ancestry group.
+  - Saved outputs: `results/popgen/pca_auc_biogeographic_system.png` and `results/popgen/pca_ovr_auc_results.csv`.
 
 
 
