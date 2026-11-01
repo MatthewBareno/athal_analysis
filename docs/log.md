@@ -44,14 +44,15 @@
 - Intersected VCF samples with FT10 phenotypes to confirm exactly 1,003 common accessions saved to `data/processed/common_samples.txt`.
 - Created `scripts/prepare_phenotypes.py`: generated clean merged dataset `data/processed/phenotype_clean.csv` (with geographic and site metadata) and PLINK-compatible phenotype file `data/processed/ft10_pheno_plink.txt`.
 - Created `scripts/prep_genotypes.sh` to subset the 19.2 GB VCF to the 1,003 common accessions, filter for biallelic SNPs (`--snps-only just-acgt --min-alleles 2 --max-alleles 2`), filter by call rate (`--geno 0.10`), standardize variant IDs (`@:#:$r:$a`), and export both PLINK2 (PGEN) and PLINK1 (BED/BIM/FAM) binary formats.
-- Executed genotype QC pipeline and updated to standard GWAS threshold **MAF >= 0.05**:
+- Executed genotype QC pipeline with threshold **MAF >= 0.01** (retaining low-frequency alleles for popgen and fine-mapping):
   - 12,883,854 total variants scanned from joint VCF across 1,135 samples.
   - Subsetting to 1,003 target accessions retained all 1,003 samples.
   - 2,176,424 non-biallelic / indel sites excluded.
   - 4,861,385 variants excluded with >10% missing call rate (`--geno 0.10`).
-  - 5,096,323 variants excluded with MAF < 0.05 (`--maf 0.05`).
-  - Final filtered dataset: **749,722 high-confidence common biallelic SNPs** across 1,003 accessions.
-  - Generated canonical datasets: `data/processed/athal_1003_qc.pgen` (110 MB) / `.pvar` / `.psam` and `data/processed/athal_1003_qc.bed` (180 MB) / `.bim` / `.fam`.
+  - 4,151,104 variants excluded with MAF < 0.01 (`--maf 0.01`).
+  - Final filtered dataset: **1,694,941 high-confidence biallelic SNPs** across 1,003 accessions.
+  - Generated canonical datasets: `data/processed/athal_1003_qc.pgen` (189 MB) / `.pvar` (75 MB) / `.psam` (7.9 KB) and `data/processed/athal_1003_qc.bed` (406 MB) / `.bim` (51 MB) / `.fam` (16 KB).
+
 
 
 

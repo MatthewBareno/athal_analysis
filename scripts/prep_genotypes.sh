@@ -24,7 +24,7 @@ plink2 \
   --min-alleles 2 \
   --max-alleles 2 \
   --geno 0.10 \
-  --maf 0.05 \
+  --maf 0.01 \
   --set-all-var-ids '@:#:$r:$a' \
   --allow-extra-chr \
   --threads 8 \
